@@ -1,0 +1,102 @@
+This is the "Golden Path" to your minimal Linux system. 
+We will compile the Kernel, build a static BusyBox (with your tc fix), 
+and structure a proper root filesystem into the ~/boot directory.
+
+1. Environment Setup
+Install the required tools for building the kernel and packing the filesystem.
+
+sudo apt update && sudo apt install build-essential libncurses-dev bison flex libssl-dev libelf-dev qemu-system-x86 wget -y
+cd ~
+mkdir -p ~/boot ~/rootfs
+
+2. Compile the Linux Kernel
+We use the standard x86 configuration which includes the drivers needed for QEMU.
+
+cd ~
+# Clone if you haven't; otherwise skip to 'cd linux'
+git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+cd linux
+
+# Generate the default 64-bit configuration
+make x86_64_defconfig
+#make menuconfig
+
+# Compile the kernel (this takes a few minutes)
+make -j$(nproc)
+
+# Move the resulting binary to your boot folder
+mkdir ~/boot
+cp arch/x86/boot/bzImage ~/boot/vmlinuz
+
+3. Compile BusyBox (with tc Fix)
+We use the official mirror and apply your sed commands to bypass the networking header errors.
+
+cd ~
+wget https://busybox.net/downloads/busybox-1.36.1.tar.bz2
+tar xjf busybox-1.36.1.tar.bz2
+cd busybox-1.36.1
+
+# Create the initial config
+make defconfig
+
+# Fix the 'tc' compilation error and ensure the build is static
+sed -i 's/CONFIG_TC=y/# CONFIG_TC is not set/' .config
+sed -i 's/CONFIG_FEATURE_TC_INGRESS=y/# CONFIG_FEATURE_TC_INGRESS is not set/' .config
+sed -i 's/# CONFIG_STATIC is not set/CONFIG_STATIC=y/' .config
+
+# Build and install to the local _install directory
+make -j$(nproc)
+make install
+
+4. Build the Root Filesystem (Rootfs)
+The Kernel needs a specific structure to find the "Init" process.
+
+# Clean the staging area and copy BusyBox files
+cd ~
+mkdir ~/rootfs
+rm -rf ~/rootfs/*
+cd ~/rootfs
+cp -av ~/busybox-*/_install/* .
+
+# Create essential system directories
+mkdir -p dev proc sys etc/init.d tmp root
+
+# Create the startup script that mounts systems and handles devices
+cat << 'EOF' > etc/init.d/rcS
+#!/bin/sh
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mdev -s
+echo "---------------------------------------"
+echo "        CUSTOM LINUX BOOTED            "
+echo "---------------------------------------"
+EOF
+
+chmod +x etc/init.d/rcS
+
+# Create the primary init file (the first thing the kernel runs)
+cat << 'EOF' > init
+#!/bin/sh
+# Handoff control to the BusyBox init system
+exec /sbin/init
+EOF
+
+chmod +x init
+
+5. Pack and Boot
+Now we create the initrd.img (Initial RAM Disk) and launch QEMU.
+
+# Pack the filesystem
+cd ~
+cd ~/rootfs
+find . -print0 | cpio --null -ov --format=newc | gzip -9 > ~/boot/initrd.img
+
+6. Boot the created Linux image and initramfs in QEMU
+# Boot the system
+cd ~
+qemu-system-x86_64 \
+    -kernel ~/boot/vmlinuz \
+    -initrd ~/boot/initrd.img \
+    -nographic \
+    -append "console=ttyS0"
