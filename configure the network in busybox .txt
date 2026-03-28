@@ -2,7 +2,7 @@
 
 Edit:
 
-vi /home/ashlo/boot/initrd/etc/init.d/rcS
+nano /home/ashlo/boot/initrd/etc/init.d/rcS
 🔧 Add this at the END (before any shell/exit)
 echo "[*] Starting network..."
 
@@ -18,7 +18,7 @@ You MUST have the DHCP script, otherwise:
 
 📁 Create this file:
 mkdir -p /home/ashlo/boot/initrd/usr/share/udhcpc
-vi /home/ashlo/boot/initrd/usr/share/udhcpc/default.script
+nano /home/ashlo/boot/initrd/usr/share/udhcpc/default.script
 Paste:
 #!/bin/sh
 
