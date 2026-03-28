@@ -16,6 +16,7 @@ cd ~
 # Clone if you haven't; otherwise skip to 'cd linux'
 git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 #git clone --depth 1 https://github.com/torvalds/linux.git
+#git checkout v6.19.10
 cd linux
 
 # Generate the default 64-bit configuration
