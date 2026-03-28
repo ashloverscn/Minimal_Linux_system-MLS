@@ -106,6 +106,25 @@ qemu-system-x86_64 \
     -nographic \
     -append "console=ttyS0"
 
+# with no-graphic within terminal
+qemu-system-x86_64 `
+  -kernel vmlinuz `
+  -initrd initrd.img `
+  -m 2G `
+  -smp 4 `
+  -cpu qemu64 `
+  -nographic `
+  -append "console=ttyS0"
+
+# with graphic within graphical window
+qemu-system-x86_64 `
+  -kernel vmlinuz `
+  -initrd initrd.img `
+  -m 2G `
+  -smp 4 `
+  -cpu qemu64 `
+  -vga std `
+  -append "console=tty0"
 ###############################################################################
 # Create an bootable iso from it 
 1. Prepare the ISO Workspace
@@ -146,5 +165,5 @@ This saves you from burning a USB drive only to find a configuration error.
 
 # Run the ISO in a virtual machine
 qemu-system-x86_64 -cdrom ~/linux_busybox.iso -m 2G
-qemu-system-x86_64 -kernel vmlinuz -initrd initrd.img -m 2G -smp 4 -cpu qemu64 -nographic -append "console=ttyS0"
-qemu-system-x86_64 -kernel vmlinuz -initrd initrd.img -m 2G -smp 4 -cpu qemu64 -vga std -append "console=tty0"
+qemu-system-x86_64 -cdrom ~\linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -nographic -boot d
+qemu-system-x86_64 -cdrom ~\linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -vga std -boot d
