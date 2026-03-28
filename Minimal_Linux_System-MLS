@@ -105,3 +105,44 @@ qemu-system-x86_64 \
     -initrd ~/boot/initrd.img \
     -nographic \
     -append "console=ttyS0"
+
+###############################################################################
+# Create an bootable iso from it 
+1. Prepare the ISO Workspace
+We'll create a clean directory to house the ISO contents and copy your files into it.
+
+# Create the structure
+mkdir -p ~/iso_build/boot/isolinux
+
+# Copy your kernel and initrd
+cp ~/boot/vmlinuz ~/iso_build/boot/
+cp ~/boot/initrd.img ~/iso_build/boot/
+
+# Copy the bootloader files (standard locations on Debian/Ubuntu)
+cp /usr/lib/ISOLINUX/isolinux.bin ~/iso_build/boot/isolinux/
+cp /usr/lib/syslinux/modules/bios/ldlinux.c32 ~/iso_build/boot/isolinux/
+
+2. Create the Configuration File
+This file tells the BIOS how to handle the vmlinuz and initrd.img files you just moved.
+
+cat <<EOF > ~/iso_build/boot/isolinux/isolinux.cfg
+default linux
+label linux
+  kernel /boot/vmlinuz
+  append initrd=/boot/initrd.img console=tty0
+EOF
+
+3. Generate the ISO
+We use xorriso to wrap these files into a bootable image format.
+
+xorriso -as mkisofs -o ~/linux_bootable.iso \
+  -b boot/isolinux/isolinux.bin -c boot/isolinux/boot.cat \
+  -no-emul-boot -boot-load-size 4 -boot-info-table \
+  ~/iso_build
+  
+4. Verify and Test
+You can quickly check if the ISO actually boots using qemu. 
+This saves you from burning a USB drive only to find a configuration error.  
+
+# Run the ISO in a virtual machine
+qemu-system-x86_64 -cdrom ~/linux_bootable.iso -m 1G
