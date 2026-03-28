@@ -168,3 +168,6 @@ qemu-system-x86_64 -cdrom ~/linux_busybox.iso -m 2G
 # commands for windows qemu
 qemu-system-x86_64 -cdrom linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -nographic -boot d
 qemu-system-x86_64 -cdrom linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -vga std -boot d
+# with adapter bridge in same subnet
+qemu-system-x86_64 -cdrom linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -nographic -netdev tap,id=net0,ifname="Local Area Connection" -device virtio-net-pci,netdev=net0
+qemu-system-x86_64 -cdrom linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -vga std -netdev tap,id=net0,ifname="Local Area Connection" -device virtio-net-pci,netdev=net0
