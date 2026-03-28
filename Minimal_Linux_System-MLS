@@ -13,7 +13,6 @@ mkdir -p ~/boot ~/rootfs
 We use the standard x86 configuration which includes the drivers needed for QEMU.
 
 cd ~
-# Clone if you haven't; otherwise skip to 'cd linux'
 # Note : kernel.org is the official source 
 # Latest Kernel
 #git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
