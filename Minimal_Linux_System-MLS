@@ -146,3 +146,4 @@ This saves you from burning a USB drive only to find a configuration error.
 
 # Run the ISO in a virtual machine
 qemu-system-x86_64 -cdrom ~/linux_busybox.iso -m 1G
+qemu-system-x86_64 -kernel vmlinuz -initrd initrd.img -m 1G -smp 4 -cpu qemu64 -nographic -append "console=ttyS0 earlyprintk=ttyS0"
