@@ -68,9 +68,9 @@ mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mdev -s
-echo "---------------------------------------"
-echo "        CUSTOM LINUX BOOTED            "
-echo "---------------------------------------"
+echo "----------------------------------------"
+echo "       Minimal_Linux_System-MLS         "
+echo "----------------------------------------"
 EOF
 
 chmod +x etc/init.d/rcS
