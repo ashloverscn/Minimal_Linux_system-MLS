@@ -5,7 +5,6 @@ and structure a proper root filesystem into the ~/boot directory.
 1. Environment Setup
 Install the required tools for building the kernel and packing the filesystem.
 
-sudo apt update
 sudo apt update && sudo apt install build-essential libncurses-dev bison flex libssl-dev libelf-dev qemu-system-x86 wget xorriso syslinux ISOLINUX -y
 cd ~
 mkdir -p ~/boot ~/rootfs
