@@ -1,0 +1,53 @@
+✅ Modify your rcS (network only)
+
+Edit:
+
+vi /home/ashlo/boot/initrd/etc/init.d/rcS
+🔧 Add this at the END (before any shell/exit)
+echo "[*] Starting network..."
+
+# Bring interface up
+ip link set eth0 up
+
+# Get IP via DHCP
+udhcpc -i eth0 -q
+⚠️ CRITICAL (this is why it failed earlier)
+
+You MUST have the DHCP script, otherwise:
+👉 “lease obtained” but no IP applied
+
+📁 Create this file:
+mkdir -p /home/ashlo/boot/initrd/usr/share/udhcpc
+vi /home/ashlo/boot/initrd/usr/share/udhcpc/default.script
+Paste:
+#!/bin/sh
+
+case "$1" in
+    deconfig)
+        ip addr flush dev $interface
+        ;;
+    renew|bound)
+        ip addr add $ip/$subnet dev $interface
+        ip route add default via $router
+        echo "nameserver 8.8.8.8" > /etc/resolv.conf
+        ;;
+esac
+
+Make executable:
+
+chmod +x /home/ashlo/boot/initrd/usr/share/udhcpc/default.script
+🔁 Repack initrd
+cd /home/ashlo/boot/initrd
+find . | cpio -o -H newc | gzip > ../new_initrd.img
+▶️ Boot and test
+
+After boot:
+
+ip a
+
+You should see:
+
+inet 192.168.29.x
+🧪 Test connectivity
+ping 192.168.29.1
+ping 8.8.8.8
