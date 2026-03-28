@@ -106,7 +106,7 @@ qemu-system-x86_64 \
     -nographic \
     -append "console=ttyS0"
 
-# with no-graphic within terminal
+# on windows with no-graphic within terminal
 qemu-system-x86_64 `
   -kernel vmlinuz `
   -initrd initrd.img `
@@ -116,7 +116,7 @@ qemu-system-x86_64 `
   -nographic `
   -append "console=ttyS0"
 
-# with graphic within graphical window
+# on windows with graphic within graphical window
 qemu-system-x86_64 `
   -kernel vmlinuz `
   -initrd initrd.img `
