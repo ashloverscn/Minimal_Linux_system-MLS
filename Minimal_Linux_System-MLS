@@ -135,7 +135,7 @@ EOF
 3. Generate the ISO
 We use xorriso to wrap these files into a bootable image format.
 
-xorriso -as mkisofs -o ~/linux_bootable.iso \
+xorriso -as mkisofs -o ~/linux_busybox.iso \
   -b boot/isolinux/isolinux.bin -c boot/isolinux/boot.cat \
   -no-emul-boot -boot-load-size 4 -boot-info-table \
   ~/iso_build
@@ -145,4 +145,4 @@ You can quickly check if the ISO actually boots using qemu.
 This saves you from burning a USB drive only to find a configuration error.  
 
 # Run the ISO in a virtual machine
-qemu-system-x86_64 -cdrom ~/linux_bootable.iso -m 1G
+qemu-system-x86_64 -cdrom ~/linux_busybox.iso -m 1G
