@@ -15,9 +15,7 @@ We use the standard x86 configuration which includes the drivers needed for QEMU
 cd ~
 # Clone if you haven't; otherwise skip to 'cd linux'
 #git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-git clone --depth 1 https://github.com/torvalds/linux.git
-git fetch --notes --tags --depth 1 origin tag v6.19.10
-git checkout v6.19.10
+git clone --depth 1 --branch v6.19.10 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 cd linux
 
 # Generate the default 64-bit configuration
