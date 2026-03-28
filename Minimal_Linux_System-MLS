@@ -165,5 +165,6 @@ This saves you from burning a USB drive only to find a configuration error.
 
 # Run the ISO in a virtual machine
 qemu-system-x86_64 -cdrom ~/linux_busybox.iso -m 2G
-qemu-system-x86_64 -cdrom ~\linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -nographic -boot d
-qemu-system-x86_64 -cdrom ~\linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -vga std -boot d
+# commands for windows qemu
+qemu-system-x86_64 -cdrom linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -nographic -boot d
+qemu-system-x86_64 -cdrom linux_busybox.iso -m 2G -smp 4 -cpu qemu64 -vga std -boot d
