@@ -37,8 +37,8 @@ Make executable:
 
 chmod +x ~/rootfs/usr/share/udhcpc/default.script
 🔁 Repack initrd
-cd /home/ashlo/boot/initrd
-find . | cpio -o -H newc | gzip > ../new_initrd.img
+cd ~/rootfs
+find . -print0 | cpio --null -ov --format=newc | gzip -9 > ~/boot/initrd.img
 ▶️ Boot and test
 
 After boot:
