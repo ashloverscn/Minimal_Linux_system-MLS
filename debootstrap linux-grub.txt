@@ -1,0 +1,109 @@
+############################################################
+
+1. Create a Partitioned Disk Image
+Instead of a "flat" file, we will create a 3GB image and give it a standard MBR partition table.
+
+# Create the blank 3GB file
+dd if=/dev/zero of=debian_full.img bs=1M count=3000
+
+# Create a single primary partition using fdisk
+# (Sequence: n, p, 1, [enter], [enter], a, w)
+printf "n\np\n1\n\n\na\nw\n" | fdisk debian_full.img
+
+2. Map the Partitions to Loop Devices
+Since the image now has a partition table, 
+we need kpartx or losetup to "see" the internal partition (/dev/loopXp1).
+
+sudo apt install -y kpartx
+sudo kpartx -av debian_full.img
+# Note the loop device name (usually /dev/mapper/loop0p1)
+
+3. Format and Transfer Data
+Now we format the internal partition and copy your existing debian.img data into it.
+
+# Format the partition inside the image
+sudo mkfs.ext4 /dev/mapper/loop0p1
+
+# Mount the new partitioned image and your old flat image
+mkdir -p mnt_new mnt_old
+sudo mount /dev/mapper/loop0p1 mnt_new
+sudo mount -o loop debian.img mnt_old
+
+# Copy everything over
+sudo cp -av mnt_old/* mnt_new/
+
+4. Install the Kernel and GRUB
+Now we place your compiled kernel inside the image and install the bootloader.
+
+# Copy your compiled kernel into the image's /boot folder
+sudo cp vmlinuz mnt_new/boot/vmlinuz-custom
+
+# Prepare the chroot for GRUB installation
+sudo mount --bind /dev mnt_new/dev
+sudo mount --bind /proc mnt_new/proc
+sudo mount --bind /sys mnt_new/sys
+
+# Install GRUB to the image (not the partition)
+# Assuming loop0 is the device from kpartx
+# Before that we install grub as for now we are inside WSL we dont have grub 
+sudo apt update
+sudo apt install -y grub-pc-bin binutils
+sudo grub-install --target=i386-pc --boot-directory=mnt_new/boot /dev/loop0
+
+# Create the GRUB config file manually
+cat <<EOF | sudo tee mnt_new/boot/grub/grub.cfg
+set default=0
+set timeout=5
+
+menuentry "Debian Custom (Compiled Kernel)" {
+    set root=(hd0,msdos1)
+    linux /boot/vmlinuz-custom root=/dev/sda1 rw console=ttyS0
+}
+EOF
+
+5. Clean Up and Sync
+You must close everything properly to ensure the GRUB installation is written to the disk.
+
+sudo sync
+sudo umount -l mnt_new/dev mnt_new/proc mnt_new/sys
+sudo umount mnt_new
+sudo umount mnt_old
+sudo kpartx -d debian_full.img
+
+6. Boot the "All-in-One" Image
+Now, you don't need to pass the -kernel or -append flags anymore. 
+QEMU will treat the image like a real hard drive and use the internal GRUB.
+
+qemu-system-x86_64 \
+  -m 1024 \
+  -drive file=debian_full.img,format=raw \
+  -nographic
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

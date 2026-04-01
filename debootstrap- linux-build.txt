@@ -1,0 +1,90 @@
+1. Compile the Linux Kernel
+
+We use the standard x86 configuration which includes the drivers needed for QEMU.
+
+cd ~
+# Note : kernel.org is the official source 
+# Latest Kernel
+#git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+#git clone --depth 1 https://github.com/torvalds/linux.git
+# Stable as for now 
+git clone --depth 1 --branch v6.19.10 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+#git clone --depth 1 --branch v6.19 https://github.com/torvalds/linux.git
+cd linux
+
+# Generate the default 64-bit configuration
+make x86_64_defconfig
+#make menuconfig
+
+# Compile the kernel (this takes a few minutes)
+make -j$(nproc)
+
+############################################################
+2.Initialize the Disk
+
+cd ..
+mkdir debian-dist && cd debian-dist
+cp ../linux/arch/x86/boot/bzImage ./vmlinuz
+
+# Create a 2GB raw disk image
+dd if=/dev/zero of=debian.img bs=1M count=2048
+mkfs.ext4 debian.img
+
+3. Bootstrap the OS
+
+mkdir mnt
+sudo mount -o loop debian.img mnt
+sudo debootstrap --arch amd64 bookworm mnt http://deb.debian.org/debian/
+
+3. Critical Configuration (The Password Fix)
+We must mount the host's API filesystems so the passwd command works correctly inside the chroot.
+
+sudo mount --bind /dev mnt/dev
+sudo mount --bind /proc mnt/proc
+sudo mount --bind /sys mnt/sys
+
+# Set the password manually (Interactive)
+echo "Setting root password..."
+sudo chroot mnt /bin/bash -c "passwd root"
+
+# Set up fstab so the kernel knows where to find '/'
+echo "/dev/sda / ext4 errors=remount-ro 0 1" | sudo tee mnt/etc/fstab
+
+# Final Cleanup
+sudo sync
+sudo umount -l mnt/dev mnt/proc mnt/sys
+sudo umount -l mnt
+
+############################################################
+
+4: Booting the System
+You now have a fresh kernel (vmlinuz) and a fresh disk (debian.img).
+#Launch QEMU
+
+qemu-system-x86_64 \
+  -m 1024 \
+  -kernel vmlinuz \
+  -drive file=debian.img,format=raw \
+  -append "root=/dev/sda rw console=ttyS0" \
+  -nographic
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
